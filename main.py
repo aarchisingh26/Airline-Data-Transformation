@@ -68,6 +68,34 @@ def split_to_from_column(df):
     df = df.drop('To_From', axis=1)
     return df
 
+def clean_airline_codes(df):
+    
+    
+    def clean_airline_name(name):
+        if pd.isna(name):
+            return name
+        
+       
+        cleaned = re.sub(r'^[^\w\s]+|[^\w\s]+$', '', name)
+        cleaned = re.sub(r'[^\w\s]', '', cleaned)
+        cleaned = re.sub(r'[0-9]', '', cleaned)        
+        cleaned = ' '.join(cleaned.split())
+        
+        return cleaned
+    
+    print("original Airline Code values:")
+    
+    print(df['Airline Code'].tolist())
+    
+    df['Airline Code'] = df['Airline Code'].apply(clean_airline_name)
+    
+    print("cleaned-up Airline Code values:")
+    print(df['Airline Code'].tolist())
+    
+    return df
+
+
+
 
 def main():
    
@@ -80,6 +108,8 @@ def main():
     df = transform_flight_codes(df)
     
     df = split_to_from_column(df)
+    
+    df = clean_airline_codes(df)
     
     return df
 
