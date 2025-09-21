@@ -2,9 +2,18 @@ import pandas as pd
 import re
 from io import StringIO
 
-print("script running...")
+# print("script running...")
 
 def parse_airline_data(data_string):
+    """
+    This function parses stringified airline data and transforms it according to given requirements.
+    
+    Args:
+        data_string (str): The raw data string with ';' delimiters and '\n' terminators.
+        
+    Returns:
+        pd.DataFrame: Transformed dataframe with cleaned and processed data.
+    """
     
     rows = data_string.strip().split('\n')
     
@@ -34,17 +43,31 @@ def transform_flight_codes(df):
     print(df['FlightCodes'].tolist())
     
     
-    base_value = 1010
+    first_valid_idx = None
+    first_valid_value = None
+    
     
     for i in range(len(df)):
-        if pd.isna(df.loc[i, 'FlightCodes']):
-            df.loc[i, 'FlightCodes'] = base_value + (i * 10)
-        elif i == 0: 
-            base_value = df.loc[i, 'FlightCodes'] - 10
+        if not pd.isna(df.loc[i, 'FlightCodes']):
+            first_valid_idx = i
+            first_valid_value = df.loc[i, 'FlightCodes']
+            break
+    
+    if first_valid_value is not None:
+        base_val = first_valid_value - (first_valid_idx * 10)
+        
+        
+        for i in range(len(df)):
+            df.loc[i, 'FlightCodes'] = base_val + (i * 10)
+    else:
+        base_val = 20000
+        for i in range(len(df)):
+            df.loc[i, 'FlightCodes'] = base_val + (i * 10)
+    
     
     df['FlightCodes'] = df['FlightCodes'].astype(int)
     
-    print("Transformed FlightCodes values:")
+    print("updated FlightCodes values:")
     print(df['FlightCodes'].tolist())
     
     return df
@@ -110,6 +133,11 @@ def main():
     df = split_to_from_column(df)
     
     df = clean_airline_codes(df)
+    
+    print("\n" + "-"*50)
+    print("FINAL AIRLINE FLIGHT CODE TABLE:")
+    print("-"*50)
+    print(df)
     
     return df
 
